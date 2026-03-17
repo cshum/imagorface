@@ -162,9 +162,7 @@ processor := vipsprocessor.NewProcessor(
 
 ### Face Detect Cache
 
-imagorface maintains an in-memory cache of detection results, keyed by source image path. This avoids re-running the pigo cascade on the same source image across repeated requests — smart crop, `detections()`, and `redact()` all benefit.
-
-The cache stores `[]imagor.Region` slices keyed by image path and is backed by [ristretto](https://github.com/dgraph-io/ristretto) with LRU eviction and a configurable entry count.
+imagorface maintains an in-memory cache of detection results, keyed by source image path. This avoids re-running the pigo cascade on the same source image across repeated requests — smart crop, `detections()`, and `redact()` all benefit. The cache is backed by [ristretto](https://github.com/dgraph-io/ristretto) with LRU eviction and a configurable entry count.
 
 ```dotenv
 FACE_DETECT_CACHE_SIZE=500  # Max number of cached detection results. Default 0 = disabled
