@@ -35,6 +35,14 @@ func WithFaceDetector(fs *flag.FlagSet, cb func() (*zap.Logger, bool)) imagor.Op
 		"face detect cache size in number of entries (one per unique source image path). 0 = disabled (default)")
 	faceDetectCacheTTL := fs.Duration("face-detect-cache-ttl", 0,
 		"face detect cache TTL. 0 = no expiry (default)")
+	faceDetectMinSize := fs.Int("face-detect-min-size", 20,
+		"minimum face size in pixels on the probe image (default 20)")
+	faceDetectMaxSize := fs.Int("face-detect-max-size", 400,
+		"maximum face size in pixels on the probe image (default 400)")
+	faceDetectMinQuality := fs.Float64("face-detect-min-quality", 5.0,
+		"minimum detection quality threshold; lower = more candidates, higher = fewer false positives (default 5.0)")
+	faceDetectIoU := fs.Float64("face-detect-iou-threshold", 0.2,
+		"intersection-over-union threshold for non-maxima suppression (default 0.2)")
 	logger, isDebug := cb()
 	var d imagor.Detector
 	if *faceDetect {
@@ -43,6 +51,10 @@ func WithFaceDetector(fs *flag.FlagSet, cb func() (*zap.Logger, bool)) imagor.Op
 			WithDebug(isDebug),
 			WithCacheSize(*faceDetectCacheSize),
 			WithCacheTTL(*faceDetectCacheTTL),
+			WithMinSize(*faceDetectMinSize),
+			WithMaxSize(*faceDetectMaxSize),
+			WithMinQuality(float32(*faceDetectMinQuality)),
+			WithIoUThreshold(*faceDetectIoU),
 		)
 	}
 	return imagor.WithDetector(d)

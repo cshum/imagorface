@@ -72,10 +72,12 @@ http://localhost:8000/unsafe/filters:redact(ff0000)/https://example.com/photo.jp
 
 imagorface exposes detected face regions through imagor's metadata endpoint. Each region is returned in absolute pixels relative to the output image dimensions, along with a detection score and label.
 
-To use the metadata endpoint, add `/meta` right after the URL signature hash before the image operations:
+To use the metadata endpoint, add `/meta` right after the URL signature hash before the image operations. Detection only runs when the URL semantically requests it — `smart`, `detections()`, or `redact()` to trigger detection:
 
 ```
-http://localhost:8000/unsafe/meta/https://example.com/photo.jpg
+# Runs detection, returns detected_regions
+http://localhost:8000/unsafe/meta/filters:detections()/https://example.com/photo.jpg
+http://localhost:8000/unsafe/meta/smart/https://example.com/photo.jpg
 ```
 
 Response includes a `detected_regions` array:
@@ -136,7 +138,7 @@ processor := vipsprocessor.NewProcessor(
 
 ### Face Detect Cache
 
-imagorface maintains an in-memory cache of detection results, keyed by source image path. This avoids re-running the pigo cascade on the same source image across repeated requests — smart crop, metadata, and the `detections()` filter all benefit.
+imagorface maintains an in-memory cache of detection results, keyed by source image path. This avoids re-running the pigo cascade on the same source image across repeated requests — smart crop, `detections()`, and `redact()` all benefit.
 
 The cache stores `[]imagor.Region` slices keyed by image path and is backed by [ristretto](https://github.com/dgraph-io/ristretto) with LRU eviction and a configurable entry count.
 
@@ -158,9 +160,28 @@ Configuration options specific to imagorface. Please see [imagor configuration](
 ```
   -face-detect
         enable pigo face detection for smart crop
+  -face-detect-min-size int
+        minimum face size in pixels on the probe image (default 20)
+  -face-detect-max-size int
+        maximum face size in pixels on the probe image (default 400)
+  -face-detect-min-quality float
+        minimum detection quality threshold; lower = more candidates, higher = fewer false positives (default 5.0)
+  -face-detect-iou-threshold float
+        intersection-over-union threshold for non-maxima suppression (default 0.2)
   -face-detect-cache-size int
         face detect cache size in number of entries (one per unique source image path). 0 = disabled (default)
   -face-detect-cache-ttl duration
         face detect cache TTL. 0 = no expiry (default)
+```
+
+Environment variable equivalents (uppercase, hyphens → underscores):
+```dotenv
+FACE_DETECT=1
+FACE_DETECT_MIN_SIZE=20
+FACE_DETECT_MAX_SIZE=400
+FACE_DETECT_MIN_QUALITY=5.0
+FACE_DETECT_IOU_THRESHOLD=0.2
+FACE_DETECT_CACHE_SIZE=500
+FACE_DETECT_CACHE_TTL=1h
 ```
 
