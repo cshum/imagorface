@@ -4,11 +4,17 @@
 [![Codecov](https://img.shields.io/codecov/c/github/cshum/imagorface)](https://codecov.io/gh/cshum/imagorface)
 [![Docker Hub](https://img.shields.io/badge/docker-shumc/imagorface-blue.svg)](https://hub.docker.com/r/shumc/imagorface/)
 
-imagorface brings face detection capability through [pigo](https://github.com/esimov/pigo), built on the foundations of [imagor](https://github.com/cshum/imagor) — a fast, secure image processing server and Go library, using libvips.
+imagorface brings fast, on-the-fly face detection to [imagor](https://github.com/cshum/imagor) — detecting faces at request time with no pre-processing pipeline, no external API calls, and no data leaving your infrastructure.
 
-imagorface uses pigo's pure-Go PICO cascade classifier to detect faces in an image. Detected face regions replace libvips' attention heuristic as the smart crop anchor, producing face-centred crops. It also exposes detected regions through imagor's [metadata endpoint](#metadata) and the [`detections`](#filters) filter for visual inspection.
+Built on [pigo](https://github.com/esimov/pigo) PICO cascade classifier to detect faces in an image. Detected face regions replace libvips attention heuristic as the smart crop anchor, producing face-centred crops. Results are optionally cached per source image path so repeated requests for the same image pay the detection cost only once.
 
-imagorface implements the imagor [`Detector` interface](https://github.com/cshum/imagor/blob/master/detector.go), wiring into imagor's [loader, storage and result storage](https://github.com/cshum/imagor#loader-storage-and-result-storage), which supports HTTP(s), File System, AWS S3 and Google Cloud Storage out of the box.
+- **Face-centred smart crop** — detected faces replace libvips' attention heuristic as the crop anchor, so portraits are never cropped at the neck
+- **Privacy redaction** — blur, pixelate, or solid-fill detected faces for content moderation
+- **Visual debugging** — colour-coded bounding boxes via `detections()` for tuning and inspection
+- **Metadata API** — detected regions exposed through imagor `/meta` metadata endpoint for downstream use
+- **Self-hosted** — no third-party API, no per-call cost, no data egress
+
+imagorface implements the imagor [`Detector` interface](https://github.com/cshum/imagor/blob/master/detector.go), wiring into imagor [loader, storage and result storage](https://github.com/cshum/imagor#loader-storage-and-result-storage), which supports HTTP(s), File System, AWS S3 and Google Cloud Storage out of the box.
 
 This also aims to be a reference project demonstrating imagor extension.
 
@@ -21,6 +27,11 @@ docker run -p 8000:8000 shumc/imagorface -imagor-unsafe -face-detect
 Enable face-centred smart crop:
 ```
 http://localhost:8000/unsafe/300x300/smart/https://example.com/group-photo.jpg
+```
+
+Blur detected faces for privacy:
+```
+http://localhost:8000/unsafe/filters:redact()/https://example.com/photo.jpg
 ```
 
 Visualise detected regions:
@@ -48,7 +59,7 @@ http://localhost:8000/unsafe/filters:detections()/https://example.com/photo.jpg
   - `mode` — `blur` (default), `pixelate`, or any color name/hex for solid fill (e.g. `black`, `white`, `ff0000`)
   - `strength` — blur sigma (default 15) or pixelate block size in pixels (default 10). Not used for solid color mode.
 
-```
+```bash
 # Blur detected faces (default)
 http://localhost:8000/unsafe/filters:redact()/https://example.com/photo.jpg
 
@@ -66,6 +77,19 @@ http://localhost:8000/unsafe/filters:redact(white)/https://example.com/photo.jpg
 
 # Custom color fill
 http://localhost:8000/unsafe/filters:redact(ff0000)/https://example.com/photo.jpg
+```
+
+- `redact_oval([mode[, strength]])` identical to `redact` but applies an **elliptical mask** to each region, producing a rounded/oval redaction shape. This is the most natural shape for face anonymisation as it closely follows the contour of a face. Same arguments and defaults as `redact`.
+
+```bash
+# Oval blur (most natural for faces)
+http://localhost:8000/unsafe/filters:redact_oval()/https://example.com/photo.jpg
+
+# Oval pixelate
+http://localhost:8000/unsafe/filters:redact_oval(pixelate)/https://example.com/photo.jpg
+
+# Oval solid black ellipse
+http://localhost:8000/unsafe/filters:redact_oval(black)/https://example.com/photo.jpg
 ```
 
 ### Metadata
@@ -174,7 +198,7 @@ Configuration options specific to imagorface. Please see [imagor configuration](
         face detect cache TTL. 0 = no expiry (default)
 ```
 
-Environment variable equivalents (uppercase, hyphens → underscores):
+Environment variable equivalents:
 ```dotenv
 FACE_DETECT=1
 FACE_DETECT_MIN_SIZE=20
@@ -184,4 +208,3 @@ FACE_DETECT_IOU_THRESHOLD=0.2
 FACE_DETECT_CACHE_SIZE=500
 FACE_DETECT_CACHE_TTL=1h
 ```
-
