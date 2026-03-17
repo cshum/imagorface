@@ -38,24 +38,10 @@ Face detection runs on a downscaled greyscale probe derived from the raw decoded
 
 imagorface adds the `detections` filter to the imagor pipeline. See [imagor filters](https://github.com/cshum/imagor#filters) for the full filter reference.
 
-- `detections([color],[name:color,...])` draws bounding box outlines for all detected regions onto the image. Intended for visual debugging.
-
-The optional bare `color` argument sets the default outline colour (default: green). Per-name overrides use `name:color` syntax and assign a distinct colour to regions whose `name` field matches exactly — useful when multiple detector classes are present.
-
-Examples:
+- `detections()` draws colour-coded bounding boxes for all detected regions — each class name is automatically assigned a distinct colour for visual debugging.
 
 ```
-# All regions in default green
 http://localhost:8000/unsafe/filters:detections()/https://example.com/photo.jpg
-
-# All regions in red
-http://localhost:8000/unsafe/filters:detections(ff0000)/https://example.com/photo.jpg
-
-# faces in red, default green for any other class
-http://localhost:8000/unsafe/filters:detections(face:ff0000)/https://example.com/photo.jpg
-
-# default yellow, faces overridden to red
-http://localhost:8000/unsafe/filters:detections(ffff00,face:ff0000)/https://example.com/photo.jpg
 ```
 
 ### Metadata
