@@ -111,6 +111,23 @@ processor := vipsprocessor.NewProcessor(
 )
 ```
 
+### Face Detect Cache
+
+imagorface maintains an in-memory cache of detection results, keyed by source image path. This avoids re-running the pigo cascade on the same source image across repeated requests — smart crop, metadata, and the `detections()` filter all benefit.
+
+The cache stores `[]imagor.Region` slices keyed by image path and is backed by [ristretto](https://github.com/dgraph-io/ristretto) with LRU eviction and a configurable entry count.
+
+```dotenv
+FACE_DETECT_CACHE_SIZE=500  # Max number of cached detection results. Default 0 = disabled
+FACE_DETECT_CACHE_TTL=1h    # Cache entry TTL. Default 0 = no expiry (LRU eviction only)
+```
+
+**When to use:**
+- Enable when the same source images are requested repeatedly (e.g. a product catalogue where the same images are cropped at multiple sizes). The first request runs pigo; all subsequent requests for the same path return the cached regions instantly.
+- Set `FACE_DETECT_CACHE_TTL` if source images may change at the same path (e.g. mutable assets). Without a TTL, stale detection results are served until evicted by memory pressure or process restart.
+- Leave disabled (default) if source image paths are highly varied or user-supplied, as caching provides no benefit.
+- The `detections()` visual debug filter always bypasses the cache (it passes an empty path) since it is not a hot path.
+
 ### Configuration
 
 Configuration options specific to imagorface. Please see [imagor configuration](https://github.com/cshum/imagor#configuration) for all existing options available.
@@ -118,4 +135,9 @@ Configuration options specific to imagorface. Please see [imagor configuration](
 ```
   -face-detect
         enable pigo face detection for smart crop
+  -face-detect-cache-size int
+        face detect cache size in number of entries (one per unique source image path). 0 = disabled (default)
+  -face-detect-cache-ttl duration
+        face detect cache TTL. 0 = no expiry (default)
 ```
+
