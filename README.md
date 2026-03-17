@@ -121,45 +121,6 @@ Response includes a `detected_regions` array:
 
 `score` is the raw pigo detection quality (higher is more confident). `name` is `"face"` for all regions returned by this detector.
 
-### Go Library
-
-imagorface can be used as a Go library alongside imagor:
-
-```go
-import (
-    "github.com/cshum/imagor/config"
-    "github.com/cshum/imagor/config/vipsconfig"
-    imagorface "github.com/cshum/imagorface"
-)
-
-server := config.CreateServer(
-    os.Args[1:],
-    vipsconfig.WithVips,
-    imagorface.WithFaceDetector, // must be listed after WithVips
-)
-if server != nil {
-    server.Run()
-}
-```
-
-Or construct a detector directly and pass it to `vipsprocessor`:
-
-```go
-import (
-    "github.com/cshum/imagor/processor/vipsprocessor"
-    imagorface "github.com/cshum/imagorface"
-)
-
-detector := imagorface.NewDetector(
-    imagorface.WithMinSize(20),
-    imagorface.WithMinQuality(5.0),
-)
-
-processor := vipsprocessor.NewProcessor(
-    vipsprocessor.WithDetector(detector),
-)
-```
-
 ### Face Detect Cache
 
 imagorface maintains an in-memory cache of detection results, keyed by source image path. This avoids re-running the pigo cascade on the same source image across repeated requests — smart crop, `detections()`, and `redact()` all benefit. The cache is backed by [ristretto](https://github.com/dgraph-io/ristretto) with LRU eviction and a configurable entry count.
