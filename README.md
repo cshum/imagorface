@@ -36,12 +36,36 @@ Face detection runs on a downscaled greyscale probe derived from the raw decoded
 
 ### Filters
 
-imagorface adds the `detections` filter to the imagor pipeline. See [imagor filters](https://github.com/cshum/imagor#filters) for the full filter reference.
+imagorface enables the following filters in the imagor pipeline. See [imagor filters](https://github.com/cshum/imagor#filters) for the full filter reference.
 
-- `detections()` draws colour-coded bounding boxes for all detected regions — each class name is automatically assigned a distinct colour for visual debugging.
+- `detections()` **debug only** — draws colour-coded bounding boxes for all detected regions. Each class name is automatically assigned a distinct colour via hash-based palette for visual inspection.
 
 ```
 http://localhost:8000/unsafe/filters:detections()/https://example.com/photo.jpg
+```
+
+- `redact([mode[, strength]])` obscures all detected regions for privacy/anonymisation (e.g. GDPR face blurring, legal document redaction). No-op when no regions are detected. Skips animated images.
+  - `mode` — `blur` (default), `pixelate`, or any color name/hex for solid fill (e.g. `black`, `white`, `ff0000`)
+  - `strength` — blur sigma (default 15) or pixelate block size in pixels (default 10). Not used for solid color mode.
+
+```
+# Blur detected faces (default)
+http://localhost:8000/unsafe/filters:redact()/https://example.com/photo.jpg
+
+# Pixelate detected faces
+http://localhost:8000/unsafe/filters:redact(pixelate)/https://example.com/photo.jpg
+
+# Blur with custom strength
+http://localhost:8000/unsafe/filters:redact(blur,25)/https://example.com/photo.jpg
+
+# Solid black fill (most common for legal/compliance redaction)
+http://localhost:8000/unsafe/filters:redact(black)/https://example.com/photo.jpg
+
+# Solid white fill
+http://localhost:8000/unsafe/filters:redact(white)/https://example.com/photo.jpg
+
+# Custom color fill
+http://localhost:8000/unsafe/filters:redact(ff0000)/https://example.com/photo.jpg
 ```
 
 ### Metadata
