@@ -28,7 +28,7 @@ type Detector struct {
 	iouThreshold float64
 	cacheSize    int
 	cacheTTL     time.Duration
-	cache        *ristretto.Cache[string, []imagor.Region]
+	cache        *ristretto.Cache[string, []imagor.DetectorRegion]
 	logger       *zap.Logger
 	debug        bool
 }
@@ -71,7 +71,7 @@ func (d *Detector) Startup(_ context.Context) (retErr error) {
 	d.classifier = classifier
 	d.logger.Debug("face detector initialised", zap.Int("cascade_bytes", len(d.cascade)))
 	if d.cacheSize > 0 {
-		cache, err := ristretto.NewCache[string, []imagor.Region](&ristretto.Config[string, []imagor.Region]{
+		cache, err := ristretto.NewCache[string, []imagor.DetectorRegion](&ristretto.Config[string, []imagor.DetectorRegion]{
 			NumCounters: int64(d.cacheSize) * 10,
 			MaxCost:     int64(d.cacheSize),
 			BufferItems: 64,
@@ -103,7 +103,7 @@ func (d *Detector) Shutdown(_ context.Context) error {
 // Dimensions are retrieved via blob.Memory().
 //
 // Returned regions are normalised to [0.0, 1.0] relative to width / height.
-func (d *Detector) Detect(_ context.Context, imagePath string, blob *imagor.Blob) (regions []imagor.Region, err error) {
+func (d *Detector) Detect(_ context.Context, imagePath string, blob *imagor.Blob) (regions []imagor.DetectorRegion, err error) {
 	buf, width, height, bands, ok := blob.Memory()
 	if !ok {
 		return
@@ -154,7 +154,7 @@ func (d *Detector) Detect(_ context.Context, imagePath string, blob *imagor.Blob
 		right := math.Min(float64(width), float64(det.Col)+half) / float64(width)
 		bottom := math.Min(float64(height), float64(det.Row)+half) / float64(height)
 		if right > left && bottom > top {
-			regions = append(regions, imagor.Region{
+			regions = append(regions, imagor.DetectorRegion{
 				Left:   left,
 				Top:    top,
 				Right:  right,

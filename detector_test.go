@@ -193,7 +193,7 @@ func TestCacheHit(t *testing.T) {
 	defer d.Shutdown(context.Background()) //nolint:errcheck
 
 	const key = "face-cache-hit.png"
-	want := []imagor.Region{
+	want := []imagor.DetectorRegion{
 		{Left: 0.1, Top: 0.1, Right: 0.4, Bottom: 0.6, Score: 9.5, Name: "face"},
 	}
 	// Seed the cache directly.
@@ -237,7 +237,7 @@ func TestCacheTTLExpiry(t *testing.T) {
 	defer d.Shutdown(context.Background()) //nolint:errcheck
 
 	const key = "ttl-expiry.png"
-	want := []imagor.Region{
+	want := []imagor.DetectorRegion{
 		{Left: 0.1, Top: 0.1, Right: 0.4, Bottom: 0.6, Score: 7.0, Name: "face"},
 	}
 	d.cache.SetWithTTL(key, want, 1, 20*time.Millisecond)
