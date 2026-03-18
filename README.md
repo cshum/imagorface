@@ -34,6 +34,22 @@ Visualise detected regions:
 http://localhost:8000/unsafe/filters:draw_detections()/https://example.com/group-photo.jpg
 ```
 
+### Examples
+
+The following examples use [`testdata/people.jpg`](testdata/people.jpg) resized to `500x300`:
+
+| Smart crop (`500x300/smart`) | Draw detections (`draw_detections()`) |
+|---|---|
+| ![smart crop](testdata/demo-smart-crop.jpg) | ![draw detections](testdata/demo-draw-detections.jpg) |
+
+| Redact blur (`redact()`) | Redact pixelate (`redact(pixelate)`) |
+|---|---|
+| ![redact blur](testdata/demo-redact-blur.jpg) | ![redact pixelate](testdata/demo-redact-pixelate.jpg) |
+
+| Redact solid black (`redact(black)`) | Redact oval blur (`redact_oval()`) |
+|---|---|
+| ![redact black](testdata/demo-redact-black.jpg) | ![redact oval blur](testdata/demo-redact-oval.jpg) |
+
 ### Smart Crop
 
 When `-face-detector` is enabled, imagorface runs face detection before the crop step. If one or more faces are found, their bounding boxes are used as the focal region for [imagor's smart crop](https://github.com/cshum/imagor#image-endpoint), replacing the default libvips attention-based heuristic. When no faces are found, imagor falls back to the standard attention crop.
