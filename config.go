@@ -57,5 +57,5 @@ func WithFaceDetector(fs *flag.FlagSet, cb func() (*zap.Logger, bool)) imagor.Op
 			WithIoUThreshold(*faceDetectIoU),
 		)
 	}
-	return imagor.WithDetector(d)
+	return imagor.WithDetectors(d)
 }
