@@ -6,7 +6,7 @@
 
 imagorface brings fast, on-the-fly face detection to [imagor](https://github.com/cshum/imagor). Built on [pigo](https://github.com/esimov/pigo) PICO cascade classifier to detect faces in an image. Detected face regions replace libvips attention heuristic as the smart crop anchor, producing face-centred crops.
 
-- **Face-centred smart crop** — detected faces as the smart crop anchor, so portraits are never cropped at the neck
+- **Face-centred smart crop** — detected faces as the smart crop anchor, no more headless bodies
 - **Privacy redaction** — blur, pixelate, or solid-fill detected faces for content moderation
 - **Metadata API** — detected regions exposed through imagor `/meta` metadata endpoint for downstream use
 - **Self-hosted** — no third-party API, no per-call cost, no data egress
