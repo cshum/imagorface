@@ -17,8 +17,8 @@ func TestConfig(t *testing.T) {
 		srv := config.CreateServer([]string{}, vipsconfig.WithVips, WithFaceDetector)
 		app := srv.App.(*imagor.Imagor)
 		proc := app.Processors[0].(*vipsprocessor.Processor)
-		assert.Nil(t, proc.Detector,
-			"detector must be nil when -face-detector is not set")
+		assert.Empty(t, proc.Detectors,
+			"detectors must be empty when -face-detector is not set")
 	})
 
 	t.Run("face-detector enabled wires detector", func(t *testing.T) {
@@ -27,9 +27,9 @@ func TestConfig(t *testing.T) {
 		}, vipsconfig.WithVips, WithFaceDetector)
 		app := srv.App.(*imagor.Imagor)
 		proc := app.Processors[0].(*vipsprocessor.Processor)
-		require.NotNil(t, proc.Detector,
-			"detector must be set when -face-detector is passed")
-		d, ok := proc.Detector.(*Detector)
+		require.Len(t, proc.Detectors, 1,
+			"one detector must be wired when -face-detector is passed")
+		d, ok := proc.Detectors[0].(*Detector)
 		require.True(t, ok, "detector must be *imagorface.Detector")
 		// Defaults
 		assert.Equal(t, 20, d.minSize)
@@ -52,8 +52,8 @@ func TestConfig(t *testing.T) {
 		}, vipsconfig.WithVips, WithFaceDetector)
 		app := srv.App.(*imagor.Imagor)
 		proc := app.Processors[0].(*vipsprocessor.Processor)
-		require.NotNil(t, proc.Detector)
-		d, ok := proc.Detector.(*Detector)
+		require.Len(t, proc.Detectors, 1)
+		d, ok := proc.Detectors[0].(*Detector)
 		require.True(t, ok)
 		assert.Equal(t, 30, d.minSize)
 		assert.Equal(t, 300, d.maxSize)
