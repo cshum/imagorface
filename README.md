@@ -4,24 +4,19 @@
 [![Codecov](https://img.shields.io/codecov/c/github/cshum/imagorface)](https://codecov.io/gh/cshum/imagorface)
 [![Docker Hub](https://img.shields.io/badge/docker-shumc/imagorface-blue.svg)](https://hub.docker.com/r/shumc/imagorface/)
 
-imagorface brings fast, on-the-fly face detection to [imagor](https://github.com/cshum/imagor) — detecting faces at request time with no pre-processing pipeline, no external API calls, and no data leaving your infrastructure.
+imagorface brings fast, on-the-fly face detection to [imagor](https://github.com/cshum/imagor). Built on [pigo](https://github.com/esimov/pigo) PICO cascade classifier to detect faces in an image. Detected face regions replace libvips attention heuristic as the smart crop anchor, producing face-centred crops.
 
-Built on [pigo](https://github.com/esimov/pigo) PICO cascade classifier to detect faces in an image. Detected face regions replace libvips attention heuristic as the smart crop anchor, producing face-centred crops. Results are optionally cached per source image path so repeated requests for the same image pay the detection cost only once.
-
-- **Face-centred smart crop** — detected faces replace libvips' attention heuristic as the crop anchor, so portraits are never cropped at the neck
+- **Face-centred smart crop** — detected faces as the smart crop anchor, so portraits are never cropped at the neck
 - **Privacy redaction** — blur, pixelate, or solid-fill detected faces for content moderation
-- **Visual debugging** — colour-coded bounding boxes via `detections()` for tuning and inspection
 - **Metadata API** — detected regions exposed through imagor `/meta` metadata endpoint for downstream use
 - **Self-hosted** — no third-party API, no per-call cost, no data egress
 
-imagorface implements the imagor [`Detector` interface](https://github.com/cshum/imagor/blob/master/detector.go), wiring into imagor [loader, storage and result storage](https://github.com/cshum/imagor#loader-storage-and-result-storage), which supports HTTP(s), File System, AWS S3 and Google Cloud Storage out of the box.
-
-This also aims to be a reference project demonstrating imagor extension.
+imagorface implements the imagor [`Detector` interface](https://github.com/cshum/imagor/blob/master/detector.go), wiring into imagor [loader, storage and result storage](https://github.com/cshum/imagor#loader-storage-and-result-storage), supporting image [cropping, resizing](https://github.com/cshum/imagor#image-endpoint) and [filters](https://github.com/cshum/imagor#filters) out of the box.
 
 ### Quick Start
 
 ```bash
-docker run -p 8000:8000 shumc/imagorface -imagor-unsafe -face-detect
+docker run -p 8000:8000 shumc/imagorface -imagor-unsafe -face-detector
 ```
 
 Enable face-centred smart crop:
@@ -41,7 +36,7 @@ http://localhost:8000/unsafe/filters:detections()/https://example.com/group-phot
 
 ### Smart Crop
 
-When `-face-detect` is enabled, imagorface runs face detection before the crop step. If one or more faces are found, their bounding boxes are used as the focal region for [imagor's smart crop](https://github.com/cshum/imagor#image-endpoint), replacing the default libvips attention-based heuristic. When no faces are found, imagor falls back to the standard attention crop.
+When `-face-detector` is enabled, imagorface runs face detection before the crop step. If one or more faces are found, their bounding boxes are used as the focal region for [imagor's smart crop](https://github.com/cshum/imagor#image-endpoint), replacing the default libvips attention-based heuristic. When no faces are found, imagor falls back to the standard attention crop.
 
 Face detection runs on a downscaled greyscale probe derived from the raw decoded pixels, keeping overhead minimal relative to the subsequent libvips operations.
 
@@ -126,13 +121,13 @@ Response includes a `detected_regions` array:
 imagorface maintains an in-memory cache of detection results, keyed by source image path. This avoids re-running the pigo cascade on the same source image across repeated requests — smart crop, `detections()`, and `redact()` all benefit. The cache is backed by [ristretto](https://github.com/dgraph-io/ristretto) with LRU eviction and a configurable entry count.
 
 ```dotenv
-FACE_DETECT_CACHE_SIZE=500  # Max number of cached detection results. Default 0 = disabled
-FACE_DETECT_CACHE_TTL=1h    # Cache entry TTL. Default 0 = no expiry (LRU eviction only)
+FACE_DETECTOR_CACHE_SIZE=500  # Max number of cached detection results. Default 0 = disabled
+FACE_DETECTOR_CACHE_TTL=1h    # Cache entry TTL. Default 0 = no expiry (LRU eviction only)
 ```
 
 **When to use:**
 - Enable when the same source images are requested repeatedly (e.g. a product catalogue where the same images are cropped at multiple sizes). The first request runs pigo; all subsequent requests for the same path return the cached regions instantly.
-- Set `FACE_DETECT_CACHE_TTL` if source images may change at the same path (e.g. mutable assets). Without a TTL, stale detection results are served until evicted by memory pressure or process restart.
+- Set `FACE_DETECTOR_CACHE_TTL` if source images may change at the same path (e.g. mutable assets). Without a TTL, stale detection results are served until evicted by memory pressure or process restart.
 - Leave disabled (default) if source image paths are highly varied or user-supplied, as caching provides no benefit.
 - The `detections()` visual debug filter always bypasses the cache (it passes an empty path) since it is not a hot path.
 
@@ -141,29 +136,29 @@ FACE_DETECT_CACHE_TTL=1h    # Cache entry TTL. Default 0 = no expiry (LRU evicti
 Configuration options specific to imagorface. Please see [imagor configuration](https://github.com/cshum/imagor#configuration) for all existing options available.
 
 ```
-  -face-detect
-        enable pigo face detection for smart crop
-  -face-detect-min-size int
+  -face-detector
+        enable face detection for smart crop
+  -face-detector-min-size int
         minimum face size in pixels on the probe image (default 20)
-  -face-detect-max-size int
+  -face-detector-max-size int
         maximum face size in pixels on the probe image (default 400)
-  -face-detect-min-quality float
+  -face-detector-min-quality float
         minimum detection quality threshold; lower = more candidates, higher = fewer false positives (default 5.0)
-  -face-detect-iou-threshold float
+  -face-detector-iou-threshold float
         intersection-over-union threshold for non-maxima suppression (default 0.2)
-  -face-detect-cache-size int
+  -face-detector-cache-size int
         face detect cache size in number of entries (one per unique source image path). 0 = disabled (default)
-  -face-detect-cache-ttl duration
+  -face-detector-cache-ttl duration
         face detect cache TTL. 0 = no expiry (default)
 ```
 
 Environment variable equivalents:
 ```dotenv
-FACE_DETECT=1
-FACE_DETECT_MIN_SIZE=20
-FACE_DETECT_MAX_SIZE=400
-FACE_DETECT_MIN_QUALITY=5.0
-FACE_DETECT_IOU_THRESHOLD=0.2
-FACE_DETECT_CACHE_SIZE=500
-FACE_DETECT_CACHE_TTL=1h
+FACE_DETECTOR=1
+FACE_DETECTOR_MIN_SIZE=20
+FACE_DETECTOR_MAX_SIZE=400
+FACE_DETECTOR_MIN_QUALITY=5.0
+FACE_DETECTOR_IOU_THRESHOLD=0.2
+FACE_DETECTOR_CACHE_SIZE=500
+FACE_DETECTOR_CACHE_TTL=1h
 ```

@@ -13,22 +13,22 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	t.Run("face-detect disabled by default", func(t *testing.T) {
+	t.Run("face-detector disabled by default", func(t *testing.T) {
 		srv := config.CreateServer([]string{}, vipsconfig.WithVips, WithFaceDetector)
 		app := srv.App.(*imagor.Imagor)
 		proc := app.Processors[0].(*vipsprocessor.Processor)
 		assert.Nil(t, proc.Detector,
-			"detector must be nil when -face-detect is not set")
+			"detector must be nil when -face-detector is not set")
 	})
 
-	t.Run("face-detect enabled wires detector", func(t *testing.T) {
+	t.Run("face-detector enabled wires detector", func(t *testing.T) {
 		srv := config.CreateServer([]string{
-			"-face-detect",
+			"-face-detector",
 		}, vipsconfig.WithVips, WithFaceDetector)
 		app := srv.App.(*imagor.Imagor)
 		proc := app.Processors[0].(*vipsprocessor.Processor)
 		require.NotNil(t, proc.Detector,
-			"detector must be set when -face-detect is passed")
+			"detector must be set when -face-detector is passed")
 		d, ok := proc.Detector.(*Detector)
 		require.True(t, ok, "detector must be *imagorface.Detector")
 		// Defaults
@@ -42,13 +42,13 @@ func TestConfig(t *testing.T) {
 
 	t.Run("all flags wired correctly", func(t *testing.T) {
 		srv := config.CreateServer([]string{
-			"-face-detect",
-			"-face-detect-min-size", "30",
-			"-face-detect-max-size", "300",
-			"-face-detect-min-quality", "8.5",
-			"-face-detect-iou-threshold", "0.35",
-			"-face-detect-cache-size", "500",
-			"-face-detect-cache-ttl", "1h",
+			"-face-detector",
+			"-face-detector-min-size", "30",
+			"-face-detector-max-size", "300",
+			"-face-detector-min-quality", "8.5",
+			"-face-detector-iou-threshold", "0.35",
+			"-face-detector-cache-size", "500",
+			"-face-detector-cache-ttl", "1h",
 		}, vipsconfig.WithVips, WithFaceDetector)
 		app := srv.App.(*imagor.Imagor)
 		proc := app.Processors[0].(*vipsprocessor.Processor)
