@@ -18,6 +18,12 @@ imagorface implements the imagor [`Detector` interface](https://github.com/cshum
 ```bash
 docker run -p 8000:8000 shumc/imagorface -imagor-unsafe -face-detector
 ```
+Original Image:
+
+```
+https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
+```
+
 
 Try these URLs after starting the server:
 ```
