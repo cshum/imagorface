@@ -11,6 +11,8 @@ import (
 	"github.com/cshum/imagor"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 // makeBlob constructs a BlobTypeMemory blob from a solid-colour RGBA image of
@@ -311,4 +313,55 @@ func TestToGrayscaleRGBA(t *testing.T) {
 	got := toGrayscale(buf, 1, 1, 4)
 	require.Len(t, got, 1)
 	assert.EqualValues(t, 149, got[0])
+}
+
+// TestDebugLoggingEmitsEntry verifies that when debug is enabled, Detect
+// emits a "face detect" log entry containing width, height, regions, and took
+// fields via the deferred logger inside the debug branch.
+func TestDebugLoggingEmitsEntry(t *testing.T) {
+	core, logs := observer.New(zap.DebugLevel)
+	logger := zap.New(core)
+
+	d := NewDetector(
+		WithDebug(true),
+		WithLogger(logger),
+	)
+	require.NoError(t, d.Startup(context.Background()))
+	defer d.Shutdown(context.Background()) //nolint:errcheck
+
+	blob := makeBlob(60, 60, 3)
+	_, err := d.Detect(context.Background(), "", blob)
+	require.NoError(t, err)
+
+	entries := logs.FilterMessage("face detect").All()
+	require.Len(t, entries, 1, "expected exactly one 'face detect' log entry")
+
+	fields := entries[0].ContextMap()
+	assert.Contains(t, fields, "width", "log entry must contain width field")
+	assert.Contains(t, fields, "height", "log entry must contain height field")
+	assert.Contains(t, fields, "regions", "log entry must contain regions field")
+	assert.Contains(t, fields, "took", "log entry must contain took field")
+}
+
+// TestCacheStoreWithTTL verifies that when WithCacheTTL is configured, Detect
+// stores the result via SetWithTTL so the entry expires after the TTL elapses.
+// This covers the `if d.cacheTTL > 0 { d.cache.SetWithTTL(...) }` branch.
+func TestCacheStoreWithTTL(t *testing.T) {
+	const ttl = 50 * time.Millisecond
+	d := NewDetector(WithCacheSize(100), WithCacheTTL(ttl))
+	require.NoError(t, d.Startup(context.Background()))
+	defer d.Shutdown(context.Background()) //nolint:errcheck
+
+	const key = "ttl-store.png"
+	blob := makeBlob(60, 60, 3)
+
+	_, err := d.Detect(context.Background(), key, blob)
+	require.NoError(t, err)
+
+	// Entry should be present immediately after Detect stores it via SetWithTTL.
+	assert.Equal(t, 1, cacheHitCount(d, key), "cache entry should exist right after Detect")
+
+	// After TTL elapses the entry should be evicted.
+	time.Sleep(3 * ttl)
+	assert.Equal(t, 0, cacheHitCount(d, key), "cache entry should be evicted after TTL")
 }
