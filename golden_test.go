@@ -59,49 +59,49 @@ func TestGolden(t *testing.T) {
 	tests := []goldenTest{
 		{
 			name:        "smart crop",
-			path:        "500x300/smart/people.jpg",
+			path:        "500x250/smart/people.jpg",
 			displayFile: "demo-smart-crop.jpg",
 		},
 		{
 			name:        "draw detections",
-			path:        "500x300/smart/filters:draw_detections()/people.jpg",
+			path:        "500x250/smart/filters:draw_detections()/people.jpg",
 			displayFile: "demo-draw-detections.jpg",
 		},
 		{
 			name:        "redact blur default",
-			path:        "500x300/smart/filters:redact()/people.jpg",
+			path:        "500x250/smart/filters:redact()/people.jpg",
 			displayFile: "demo-redact-blur.jpg",
 		},
 		{
 			name:        "redact pixelate",
-			path:        "500x300/smart/filters:redact(pixelate)/people.jpg",
+			path:        "500x250/smart/filters:redact(pixelate)/people.jpg",
 			displayFile: "demo-redact-pixelate.jpg",
 		},
 		{
 			name: "redact blur custom strength",
-			path: "500x300/smart/filters:redact(blur,25)/people.jpg",
+			path: "500x250/smart/filters:redact(blur,25)/people.jpg",
 		},
 		{
 			name:        "redact black",
-			path:        "500x300/smart/filters:redact(black)/people.jpg",
+			path:        "500x250/smart/filters:redact(black)/people.jpg",
 			displayFile: "demo-redact-black.jpg",
 		},
 		{
 			name: "redact white",
-			path: "500x300/smart/filters:redact(white)/people.jpg",
+			path: "500x250/smart/filters:redact(white)/people.jpg",
 		},
 		{
 			name:        "redact oval blur",
-			path:        "500x300/smart/filters:redact_oval()/people.jpg",
+			path:        "500x250/smart/filters:redact_oval()/people.jpg",
 			displayFile: "demo-redact-oval.jpg",
 		},
 		{
 			name: "redact oval pixelate",
-			path: "500x300/smart/filters:redact_oval(pixelate)/people.jpg",
+			path: "500x250/smart/filters:redact_oval(pixelate)/people.jpg",
 		},
 		{
 			name: "redact oval black",
-			path: "500x300/smart/filters:redact_oval(black)/people.jpg",
+			path: "500x250/smart/filters:redact_oval(black)/people.jpg",
 		},
 	}
 

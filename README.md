@@ -21,24 +21,24 @@ docker run -p 8000:8000 shumc/imagorface -imagor-unsafe -face-detector
 
 Enable face-centred smart crop:
 ```
-http://localhost:8000/unsafe/300x300/smart/https://example.com/group-photo.jpg
+http://localhost:8000/unsafe/500x250/smart/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 ```
 
 Blur detected faces for privacy:
 ```
-http://localhost:8000/unsafe/filters:redact()/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact()/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 ```
 
 Visualise detected regions:
 ```
-http://localhost:8000/unsafe/filters:draw_detections()/https://example.com/group-photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:draw_detections()/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 ```
 
 ### Examples
 
-The following examples use [`testdata/people.jpg`](testdata/people.jpg) resized to `500x300`:
+The following examples use [`testdata/people.jpg`](testdata/people.jpg) resized to `500x250`:
 
-| Smart crop (`500x300/smart`) | Draw detections (`draw_detections()`) |
+| Smart crop (`500x250/smart`) | Draw detections (`draw_detections()`) |
 |---|---|
 | ![smart crop](testdata/demo-smart-crop.jpg) | ![draw detections](testdata/demo-draw-detections.jpg) |
 
@@ -60,10 +60,10 @@ Face detection runs on a downscaled greyscale probe derived from the raw decoded
 
 imagorface enables the following filters in the imagor pipeline. See [imagor filters](https://github.com/cshum/imagor#filters) for the full filter reference.
 
-- `draw_detections()` **debug only** — draws colour-coded bounding boxes for all detected regions. Each class name is automatically assigned a distinct colour via hash-based palette for visual inspection.
+- `draw_detections()` — draws colour-coded bounding boxes for all detected regions. Each class name is automatically assigned a distinct colour via hash-based palette for visual inspection.
 
 ```
-http://localhost:8000/unsafe/filters:draw_detections()/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:draw_detections()/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 ```
 
 - `redact([mode[, strength]])` obscures all detected regions for privacy/anonymisation (e.g. GDPR face blurring, legal document redaction). No-op when no regions are detected. Skips animated images.
@@ -72,35 +72,35 @@ http://localhost:8000/unsafe/filters:draw_detections()/https://example.com/photo
 
 ```bash
 # Blur detected faces (default)
-http://localhost:8000/unsafe/filters:redact()/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact()/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 
 # Pixelate detected faces
-http://localhost:8000/unsafe/filters:redact(pixelate)/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact(pixelate)/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 
 # Blur with custom strength
-http://localhost:8000/unsafe/filters:redact(blur,25)/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact(blur,25)/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 
 # Solid black fill (most common for legal/compliance redaction)
-http://localhost:8000/unsafe/filters:redact(black)/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact(black)/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 
 # Solid white fill
-http://localhost:8000/unsafe/filters:redact(white)/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact(white)/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 
 # Custom color fill
-http://localhost:8000/unsafe/filters:redact(ff0000)/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact(ff0000)/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 ```
 
 - `redact_oval([mode[, strength]])` identical to `redact` but applies an **elliptical mask** to each region, producing a rounded/oval redaction shape. This is the most natural shape for face anonymisation as it closely follows the contour of a face. Same arguments and defaults as `redact`.
 
 ```bash
 # Oval blur (most natural for faces)
-http://localhost:8000/unsafe/filters:redact_oval()/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact_oval()/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 
 # Oval pixelate
-http://localhost:8000/unsafe/filters:redact_oval(pixelate)/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact_oval(pixelate)/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 
 # Oval solid black ellipse
-http://localhost:8000/unsafe/filters:redact_oval(black)/https://example.com/photo.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact_oval(black)/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 ```
 
 ### Metadata
@@ -111,8 +111,8 @@ To use the metadata endpoint, add `/meta` right after the URL signature hash bef
 
 ```
 # Runs detection, returns detected_regions
-http://localhost:8000/unsafe/meta/filters:draw_detections()/https://example.com/photo.jpg
-http://localhost:8000/unsafe/meta/smart/https://example.com/photo.jpg
+http://localhost:8000/unsafe/meta/500x250/smart/filters:draw_detections()/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
+http://localhost:8000/unsafe/meta/500x250/smart/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 ```
 
 Response includes a `detected_regions` array:
@@ -145,11 +145,11 @@ FACE_DETECTOR_CACHE_TTL=1h    # Cache entry TTL. Default 0 = no expiry (LRU evic
 - Enable when the same source images are requested repeatedly (e.g. a product catalogue where the same images are cropped at multiple sizes). The first request runs pigo; all subsequent requests for the same path return the cached regions instantly.
 - Set `FACE_DETECTOR_CACHE_TTL` if source images may change at the same path (e.g. mutable assets). Without a TTL, stale detection results are served until evicted by memory pressure or process restart.
 - Leave disabled (default) if source image paths are highly varied or user-supplied, as caching provides no benefit.
-- The `detections()` visual debug filter always bypasses the cache (it passes an empty path) since it is not a hot path.
+- The `draw_detections()` filter always bypasses the cache (it passes an empty path) since it is not a hot path.
 
 ### Configuration
 
-Configuration options specific to imagorface. Please see [imagor configuration](https://github.com/cshum/imagor#configuration) for all existing options available.
+Configuration options specific to imagorface. Please see [imagor configuration](https://github.com/cshum/imagor#configuration) for all existing options available, including `-vips-detector-probe-size` which controls the maximum dimension of the downscaled probe image passed to any detector (default 400).
 
 ```
   -face-detector
