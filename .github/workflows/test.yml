@@ -12,6 +12,9 @@ jobs:
   test:
     name: Docker Test
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -36,6 +39,13 @@ jobs:
             -w /workspace \
             imagorface-test \
             go test ./... -v
+
+      - name: Commit golden files
+        if: github.event_name == 'pull_request'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "test: update golden files"
+          file_pattern: "testdata/golden"
 
       - name: Run coverage in Docker
         run: |
