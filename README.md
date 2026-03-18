@@ -31,7 +31,7 @@ http://localhost:8000/unsafe/filters:redact()/https://example.com/photo.jpg
 
 Visualise detected regions:
 ```
-http://localhost:8000/unsafe/filters:detections()/https://example.com/group-photo.jpg
+http://localhost:8000/unsafe/filters:draw_detections()/https://example.com/group-photo.jpg
 ```
 
 ### Smart Crop
@@ -44,10 +44,10 @@ Face detection runs on a downscaled greyscale probe derived from the raw decoded
 
 imagorface enables the following filters in the imagor pipeline. See [imagor filters](https://github.com/cshum/imagor#filters) for the full filter reference.
 
-- `detections()` **debug only** — draws colour-coded bounding boxes for all detected regions. Each class name is automatically assigned a distinct colour via hash-based palette for visual inspection.
+- `draw_detections()` **debug only** — draws colour-coded bounding boxes for all detected regions. Each class name is automatically assigned a distinct colour via hash-based palette for visual inspection.
 
 ```
-http://localhost:8000/unsafe/filters:detections()/https://example.com/photo.jpg
+http://localhost:8000/unsafe/filters:draw_detections()/https://example.com/photo.jpg
 ```
 
 - `redact([mode[, strength]])` obscures all detected regions for privacy/anonymisation (e.g. GDPR face blurring, legal document redaction). No-op when no regions are detected. Skips animated images.
@@ -91,11 +91,11 @@ http://localhost:8000/unsafe/filters:redact_oval(black)/https://example.com/phot
 
 imagorface exposes detected face regions through imagor's metadata endpoint. Each region is returned in absolute pixels relative to the output image dimensions, along with a detection score and label.
 
-To use the metadata endpoint, add `/meta` right after the URL signature hash before the image operations. Detection only runs when the URL semantically requests it — `smart`, `detections()`, or `redact()` to trigger detection:
+To use the metadata endpoint, add `/meta` right after the URL signature hash before the image operations. Detection only runs when the URL semantically requests it — `smart`, `draw_detections()`, or `redact()` to trigger detection:
 
 ```
 # Runs detection, returns detected_regions
-http://localhost:8000/unsafe/meta/filters:detections()/https://example.com/photo.jpg
+http://localhost:8000/unsafe/meta/filters:draw_detections()/https://example.com/photo.jpg
 http://localhost:8000/unsafe/meta/smart/https://example.com/photo.jpg
 ```
 
