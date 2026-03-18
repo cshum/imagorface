@@ -19,24 +19,15 @@ imagorface implements the imagor [`Detector` interface](https://github.com/cshum
 docker run -p 8000:8000 shumc/imagorface -imagor-unsafe -face-detector
 ```
 
-Enable face-centred smart crop:
+Try these URLs after starting the server:
 ```
 http://localhost:8000/unsafe/500x250/smart/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
-```
-
-Blur detected faces for privacy:
-```
-http://localhost:8000/unsafe/500x250/smart/filters:redact()/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
-```
-
-Visualise detected regions:
-```
 http://localhost:8000/unsafe/500x250/smart/filters:draw_detections()/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact()/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact(pixelate)/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact(black)/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
+http://localhost:8000/unsafe/500x250/smart/filters:redact_oval()/https://raw.githubusercontent.com/cshum/imagorface/refs/heads/main/testdata/people.jpg
 ```
-
-### Examples
-
-The following examples use [`testdata/people.jpg`](testdata/people.jpg) resized to `500x250`:
 
 | Smart crop (`500x250/smart`) | Draw detections (`draw_detections()`) |
 |---|---|
