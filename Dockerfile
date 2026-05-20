@@ -61,7 +61,7 @@ ENV LD_LIBRARY_PATH=/opt/imagor/lib
 ENV FONTCONFIG_PATH=/etc/fonts
 ENV XDG_CACHE_HOME=/tmp
 
-ENV PORT 8000
+ENV PORT=8000
 
 # use unprivileged user
 USER nobody
