@@ -1,3 +1,5 @@
+IMAGOR_BASE_IMAGE ?= ghcr.io/cshum/imagor-base:vips8.18.2-r6
+
 build:
 	go build -o bin/imagorface ./cmd/imagorface/main.go
 
@@ -14,7 +16,7 @@ get:
 	go get -v -t -d ./...
 
 docker-dev-build:
-	docker build -t imagorface:dev .
+	docker build --build-arg BASE_IMAGE=$(IMAGOR_BASE_IMAGE) --build-arg DEV_BASE_IMAGE=$(IMAGOR_BASE_IMAGE)-dev -t imagorface:dev .
 
 docker-dev-run:
 	touch .env

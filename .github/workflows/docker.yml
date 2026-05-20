@@ -6,6 +6,9 @@ on:
       - main
     tags: [ 'v*.*.*' ]
 
+env:
+  IMAGOR_BASE_IMAGE: ghcr.io/cshum/imagor-base:vips8.18.2-r6
+
 jobs:
   build:
     name: Docker
@@ -61,6 +64,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            BASE_IMAGE=${{ env.IMAGOR_BASE_IMAGE }}
+            DEV_BASE_IMAGE=${{ env.IMAGOR_BASE_IMAGE }}-dev
             ENABLE_MAGICK=false
 
   build-magick:
@@ -109,6 +114,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            BASE_IMAGE=${{ env.IMAGOR_BASE_IMAGE }}-magick
+            DEV_BASE_IMAGE=${{ env.IMAGOR_BASE_IMAGE }}-magick-dev
             ENABLE_MAGICK=true
 
   build-mozjpeg:
@@ -157,4 +164,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            BASE_IMAGE=${{ env.IMAGOR_BASE_IMAGE }}-mozjpeg
+            DEV_BASE_IMAGE=${{ env.IMAGOR_BASE_IMAGE }}-mozjpeg-dev
             ENABLE_MOZJPEG=true
