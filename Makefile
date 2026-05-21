@@ -1,4 +1,4 @@
-IMAGOR_BASE_IMAGE ?= ghcr.io/cshum/imagor-base:vips8.18.2-r6
+IMAGOR_BASE_IMAGE ?= ghcr.io/cshum/imagor-base:vips8.18.2-r7
 
 build:
 	go build -o bin/imagorface ./cmd/imagorface/main.go
