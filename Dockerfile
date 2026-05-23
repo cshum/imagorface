@@ -29,7 +29,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o ${GOPATH}/bin/imagorface ./cmd/imagorface/main.go
+RUN go build -ldflags "-s -w" -o ${GOPATH}/bin/imagorface ./cmd/imagorface/main.go
 
 FROM native-base AS runtime
 LABEL maintainer="adrian@cshum.com"
