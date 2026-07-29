@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  IMAGOR_BASE_IMAGE: ghcr.io/cshum/imagor-base:vips8.18.3-r13
+  IMAGOR_BASE_IMAGE: ghcr.io/cshum/imagor-base:vips8.18.4-r14
 
 jobs:
   test:
