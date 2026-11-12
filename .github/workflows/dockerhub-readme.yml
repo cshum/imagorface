@@ -1,0 +1,35 @@
+name: dockerhub-readme
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'README.md'
+      - '.github/workflows/dockerhub-readme.yml'
+  workflow_dispatch:
+
+jobs:
+  description:
+    name: Sync Docker Hub description
+    runs-on: ubuntu-latest
+    if: github.repository == 'cshum/imagorface'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Generate Docker Hub description
+        run: |
+          echo "dropping $(grep -c -E '<|^\[!\[' README.md) line(s) carrying raw HTML or badges"
+          grep -v -E '<|^\[!\[' README.md | cat -s \
+            | sed 's|](testdata/|](https://raw.githubusercontent.com/cshum/imagorface/main/testdata/|g' \
+            > "$RUNNER_TEMP/dockerhub-readme.md"
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v5
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: shumc/imagorface
+          short-description: 'Fast, on-the-fly face detection for imagor: face-centred smart crop and redaction'
+          readme-filepath: ${{ runner.temp }}/dockerhub-readme.md
