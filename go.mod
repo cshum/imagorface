@@ -3,7 +3,7 @@ module github.com/cshum/imagorface
 go 1.26.0
 
 require (
-	github.com/cshum/imagor v1.10.2
+	github.com/cshum/imagor v1.10.4
 	github.com/dgraph-io/ristretto/v2 v2.4.2
 	github.com/esimov/pigo v1.4.6
 	github.com/stretchr/testify v1.12.1
